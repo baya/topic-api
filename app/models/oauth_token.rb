@@ -1,5 +1,17 @@
 class OauthToken < ActiveRecord::Base
 
+  attr_accessor :token_string
+  
+  def self.create_with_user(user)
+    data = [user.id, (Time.now.to_f * 1000).to_i].join('::')
+    secret_key = generate_secret_key
+    token_string = generate_token(secret_key, data)
+    token = create(secret_key: secret_key, user_id: user.id)
+    token.token_string = token_string
+    
+    token
+  end
+
   def self.generate_secret_key
     Base64.encode64(Random.new.bytes(16))
   end
